@@ -19,8 +19,8 @@
 #define pontos 40
 #define passoFreq 0.5
 
-__constant__ double A = 30e6;
-__constant__ double B = 30e6;    //em rad/s
+__constant__ double A = (2 * Pi) * 6e6;
+__constant__ double B = (2 * Pi) * 1e6;    //em rad/s
 
 #define gama22 (2*Pi)*6.06e6
 #define gama44 (2*Pi)*6.06e6
