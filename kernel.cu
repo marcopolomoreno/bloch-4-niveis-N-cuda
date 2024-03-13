@@ -19,8 +19,8 @@
 #define pontos 40
 #define passoFreq 0.5
 
-__constant__ double A = 1e6;
-__constant__ double B = 0;    //em rad/s
+__constant__ double A = 15e6;
+__constant__ double B = 30e6;    //em rad/s
 
 #define gama22 (2*Pi)*6.06e6
 #define gama44 (2*Pi)*6.06e6
@@ -35,7 +35,6 @@ __constant__ double gama24 = 0.5 * (gama22 + gama44);
 __constant__ double gama34 = 0.5 * gama44;
 
 __constant__ double delta31 = 0;
-__constant__ double delta32 = 0;
 __constant__ double delta42 = 0;
 
 __constant__ int nucleos = blocks * threads;
@@ -59,7 +58,7 @@ inline void __cudaCheckError(const char* file, const int line)
 }
 
 __device__ double f(double a11, double a22, double a33, double a44, double a12, double b12, double a13, double b13, double a14, double b14,
-	double a23, double b23, double a24, double b24, double a34, double b34, double delta21, double delta41, double delta43, int j)  //sistema de 4 níveis
+	double a23, double b23, double a24, double b24, double a34, double b34, double delta21, double delta32, double delta41, double delta43, int j)  //sistema de 4 níveis
 {
 	/*a11*/ if (j == 1)  return 2 * A * b12 + 0.5 * gama22 * a22 + 0.5 * gama44 * a44;				   //a11
 	/*a22*/ if (j == 2)  return -2 * A * b12 + 2 * B * b23 - gama22 * a22;				//a22
@@ -88,33 +87,34 @@ __global__ void Kernel(double* a11, double* a22, double* a33, double* a44, doubl
 	int j, k;
 	double k1[17], k2[17], k3[17], k4[17];
 
-	double delta21, delta41, delta43;
+	double delta21, delta32, delta41, delta43;
 
 	int i = blockDim.x * blockIdx.x + threadIdx.x;
 
 	delta21 = 2 * Pi * (i - 0.5 * nucleos) * passoFreq * 1e6;
+	delta32 = -delta21;
 	delta43 = delta21;
-	delta41 = 2 * delta21;
+	delta41 = delta21;
 
 	for (k = 1; k <= kMax - 1; k++)    //abre loop de k (temporal)
 	{
 		for (j = 1; j <= 16; j++)
 			k1[j] = f(a11[i], a22[i], a33[i], a44[i], a12[i], b12[i], a13[i], b13[i], a14[i], b14[i], a23[i], b23[i],
-				a24[i], b24[i], a34[i], b34[i], delta21, delta41, delta43, j);
+				a24[i], b24[i], a34[i], b34[i], delta21, delta32, delta41, delta43, j);
 
 		for (j = 1; j <= 16; j++)
 			k2[j] = f(a11[i] + k1[1] * h / 2, a22[i] + k1[2] * h / 2, a33[i] + k1[3] * h / 2, a44[i] + k1[4] * h / 2, a12[i] + k1[5] * h / 2, b12[i] + k1[6] * h / 2, a13[i] + k1[7] * h / 2, b13[i] + k1[8] * h / 2,
 				a14[i] + k1[9] * h / 2, b14[i] + k1[10] * h / 2, a23[i] + k1[11] * h / 2, b23[i] + k1[12] * h / 2, a24[i] + k1[13] * h / 2, b24[i] + k1[14] * h / 2,
-				a34[i] + k1[15] * h / 2, b34[i] + k1[16] * h / 2, delta21, delta41, delta43, j);
+				a34[i] + k1[15] * h / 2, b34[i] + k1[16] * h / 2, delta21, delta32, delta41, delta43, j);
 
 		for (j = 1; j <= 16; j++)
 			k3[j] = f(a11[i] + k2[1] * h / 2, a22[i] + k2[2] * h / 2, a33[i] + k2[3] * h / 2, a44[i] + k2[4] * h / 2, a12[i] + k2[5] * h / 2, b12[i] + k2[6] * h / 2, a13[i] + k2[7] * h / 2, b13[i] + k2[8] * h / 2,
 				a14[i] + k2[9] * h / 2, b14[i] + k2[10] * h / 2, a23[i] + k2[11] * h / 2, b23[i] + k2[12] * h / 2, a24[i] + k2[13] * h / 2, b24[i] + k2[14] * h / 2,
-				a34[i] + k2[15] * h / 2, b34[i] + k2[16] * h / 2, delta21, delta41, delta43, j);
+				a34[i] + k2[15] * h / 2, b34[i] + k2[16] * h / 2, delta21, delta32, delta41, delta43, j);
 
 		for (j = 1; j <= 16; j++)
 			k4[j] = f(a11[i] + k3[1] * h, a22[i] + k3[2] * h, a33[i] + k3[3] * h, a44[i] + k3[4] * h, a12[i] + k3[5] * h, b12[i] + k3[6] * h, a13[i] + k3[7] * h, b13[i] + k3[8] * h, a14[i] + k3[9] * h, b14[i] + k3[10] * h,
-				a23[i] + k3[11] * h, b23[i] + k3[12] * h, a24[i] + k3[13] * h, b24[i] + k3[14] * h, a34[i] + k3[15] * h, b34[i] + k3[16] * h, delta21, delta41, delta43, j);
+				a23[i] + k3[11] * h, b23[i] + k3[12] * h, a24[i] + k3[13] * h, b24[i] + k3[14] * h, a34[i] + k3[15] * h, b34[i] + k3[16] * h, delta21, delta32, delta41, delta43, j);
 
 		a11[i] = a11[i] + h * (k1[1] / 6 + k2[1] / 3 + k3[1] / 3 + k4[1] / 6);	   a22[i] = a22[i] + h * (k1[2] / 6 + k2[2] / 3 + k3[2] / 3 + k4[2] / 6);
 		a33[i] = a33[i] + h * (k1[3] / 6 + k2[3] / 3 + k3[3] / 3 + k4[3] / 6);	   a44[i] = a44[i] + h * (k1[4] / 6 + k2[4] / 3 + k3[4] / 3 + k4[4] / 6);
