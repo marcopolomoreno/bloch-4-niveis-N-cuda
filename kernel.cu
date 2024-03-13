@@ -194,14 +194,14 @@ int main()
 					a[k][q] = 0;
 			}
 
-			cudaMemcpyAsync(dev_a11[pp], a[1], bytes, cudaMemcpyHostToDevice, stream[pp]); cudaMemcpyAsync(dev_a22[pp], a[2], bytes, cudaMemcpyHostToDevice, stream[pp]);
-			cudaMemcpyAsync(dev_a33[pp], a[3], bytes, cudaMemcpyHostToDevice, stream[pp]); cudaMemcpyAsync(dev_a44[pp], a[4], bytes, cudaMemcpyHostToDevice, stream[pp]);
-			cudaMemcpyAsync(dev_a12[pp], a[5], bytes, cudaMemcpyHostToDevice, stream[pp]); cudaMemcpyAsync(dev_b12[pp], a[6], bytes, cudaMemcpyHostToDevice, stream[pp]);
-			cudaMemcpyAsync(dev_a13[pp], a[13], bytes, cudaMemcpyHostToDevice, stream[pp]); cudaMemcpyAsync(dev_b13[pp], a[14], bytes, cudaMemcpyHostToDevice, stream[pp]);
-			cudaMemcpyAsync(dev_a14[pp], a[9], bytes, cudaMemcpyHostToDevice, stream[pp]); cudaMemcpyAsync(dev_b14[pp], a[10], bytes, cudaMemcpyHostToDevice, stream[pp]);
-			cudaMemcpyAsync(dev_a23[pp], a[7], bytes, cudaMemcpyHostToDevice, stream[pp]); cudaMemcpyAsync(dev_b23[pp], a[8], bytes, cudaMemcpyHostToDevice, stream[pp]);
-			cudaMemcpyAsync(dev_a24[pp], a[15], bytes, cudaMemcpyHostToDevice, stream[pp]); cudaMemcpyAsync(dev_b24[pp], a[16], bytes, cudaMemcpyHostToDevice, stream[pp]);
-			cudaMemcpyAsync(dev_a34[pp], a[11], bytes, cudaMemcpyHostToDevice, stream[pp]); cudaMemcpyAsync(dev_b34[pp], a[12], bytes, cudaMemcpyHostToDevice, stream[pp]);
+			cudaMemcpyAsync(dev_a11[pp], a[1],  bytes, cudaMemcpyHostToDevice, stream[pp]); cudaMemcpyAsync(dev_a22[pp], a[2],  bytes, cudaMemcpyHostToDevice, stream[pp]);
+			cudaMemcpyAsync(dev_a33[pp], a[3],  bytes, cudaMemcpyHostToDevice, stream[pp]); cudaMemcpyAsync(dev_a44[pp], a[4],  bytes, cudaMemcpyHostToDevice, stream[pp]);
+			cudaMemcpyAsync(dev_a12[pp], a[5],  bytes, cudaMemcpyHostToDevice, stream[pp]); cudaMemcpyAsync(dev_b12[pp], a[6],  bytes, cudaMemcpyHostToDevice, stream[pp]);
+			cudaMemcpyAsync(dev_a13[pp], a[7],  bytes, cudaMemcpyHostToDevice, stream[pp]); cudaMemcpyAsync(dev_b13[pp], a[8],  bytes, cudaMemcpyHostToDevice, stream[pp]);
+			cudaMemcpyAsync(dev_a14[pp], a[9],  bytes, cudaMemcpyHostToDevice, stream[pp]); cudaMemcpyAsync(dev_b14[pp], a[10], bytes, cudaMemcpyHostToDevice, stream[pp]);
+			cudaMemcpyAsync(dev_a23[pp], a[11], bytes, cudaMemcpyHostToDevice, stream[pp]); cudaMemcpyAsync(dev_b23[pp], a[12], bytes, cudaMemcpyHostToDevice, stream[pp]);
+			cudaMemcpyAsync(dev_a24[pp], a[13], bytes, cudaMemcpyHostToDevice, stream[pp]); cudaMemcpyAsync(dev_b24[pp], a[14], bytes, cudaMemcpyHostToDevice, stream[pp]);
+			cudaMemcpyAsync(dev_a34[pp], a[15], bytes, cudaMemcpyHostToDevice, stream[pp]); cudaMemcpyAsync(dev_b34[pp], a[16], bytes, cudaMemcpyHostToDevice, stream[pp]);
 		}
 
 		for (int pp = 0; pp <= gpu - 1; pp++)
@@ -216,14 +216,14 @@ int main()
 		for (int pp = 0; pp <= gpu - 1; pp++)
 		{
 			cudaSetDevice(pp);
-			cudaMemcpyAsync(a[1], dev_a11[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]); cudaMemcpyAsync(a[2], dev_a22[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]);
-			cudaMemcpyAsync(a[3], dev_a33[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]); cudaMemcpyAsync(a[4], dev_a44[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]);
-			cudaMemcpyAsync(a[5], dev_a12[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]); cudaMemcpyAsync(a[6], dev_b12[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]);
-			cudaMemcpyAsync(a[13], dev_a13[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]); cudaMemcpyAsync(a[14], dev_b13[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]);
-			cudaMemcpyAsync(a[9], dev_a14[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]); cudaMemcpyAsync(a[10], dev_b14[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]);
-			cudaMemcpyAsync(a[7], dev_a23[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]); cudaMemcpyAsync(a[8], dev_b23[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]);
-			cudaMemcpyAsync(a[15], dev_a24[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]); cudaMemcpyAsync(a[16], dev_b24[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]);
-			cudaMemcpyAsync(a[11], dev_a34[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]); cudaMemcpyAsync(a[12], dev_b34[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]);
+			cudaMemcpyAsync(a[1],  dev_a11[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]); cudaMemcpyAsync(a[2],  dev_a22[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]);
+			cudaMemcpyAsync(a[3],  dev_a33[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]); cudaMemcpyAsync(a[4],  dev_a44[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]);
+			cudaMemcpyAsync(a[5],  dev_a12[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]); cudaMemcpyAsync(a[6],  dev_b12[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]);
+			cudaMemcpyAsync(a[7],  dev_a13[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]); cudaMemcpyAsync(a[8],  dev_b13[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]);
+			cudaMemcpyAsync(a[9],  dev_a14[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]); cudaMemcpyAsync(a[10], dev_b14[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]);
+			cudaMemcpyAsync(a[11], dev_a23[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]); cudaMemcpyAsync(a[12], dev_b23[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]);
+			cudaMemcpyAsync(a[13], dev_a24[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]); cudaMemcpyAsync(a[14], dev_b24[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]);
+			cudaMemcpyAsync(a[15], dev_a34[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]); cudaMemcpyAsync(a[16], dev_b34[pp], bytes, cudaMemcpyDeviceToHost, stream[pp]);
 
 			for (q = 0; q <= nucleos - 1; q++)
 			{
