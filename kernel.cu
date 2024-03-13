@@ -16,31 +16,11 @@
 #define arq 1		//número de arquivo para salvar
 
 #define kMax 100000
-//#define passoVelocidade 0.195
 #define pontos 40
 #define passoFreq 0.5
 
-//#define varr 'd'
-//  d/f (diodo ou femto varrendo)
-//#define dopp 's'
-//  s/n (com doppler = sim ou não)
-//#define sinal 1
-//  1 --> copropagante , -1 --> contrapropagante
-//#define niveis 4	
-//  3 ou 4 níveis
-//#define gravaVelocidades 'n'
-//  Gera arquivos com cada velocidade na pasta dadosV
-
-//const char aumentando = 'd';
-//const double Diodo[] = { (2 * Pi) * 5e6, (2 * Pi) * 1.2e6, (2 * Pi) * 3e6, (2 * Pi) * 6e6, (2 * Pi) * 12e6, (2 * Pi) * 24e6 };
-//const double Femto[] = { (2 * Pi) * 0.6e6, (2 * Pi) * 1.2e6, (2 * Pi) * 3e6, (2 * Pi) * 6e6, (2 * Pi) * 12e6, (2 * Pi) * 24e6 };
-
 __constant__ double A = 1e6;
 __constant__ double B = 0;    //em rad/s
-
-//#define kb 1.38e-23
-//#define m 1.4195e-25
-//#define T 353
 
 #define gama22 (2*Pi)*6.06e6
 #define gama44 (2*Pi)*6.06e6
@@ -55,23 +35,10 @@ __constant__ double gama24 = 0.5 * (gama22 + gama44);
 __constant__ double gama34 = 0.5 * gama44;
 
 __constant__ double delta31 = 0;
-//__constant__ double delta41 = 2*delta21;
 __constant__ double delta32 = 0;
 __constant__ double delta42 = 0;
-//__constant__ double delta43 = delta21;
 
 __constant__ int nucleos = blocks * threads;
-
-//__constant__ char d_dopp = dopp;
-//char h_dopp = dopp;
-//__constant__ char d_var = varr;
-//char h_var = varr;
-//char grVel = gravaVelocidades;
-
-__constant__ double a10 = 0.5;                   //população inicial do estado 1
-__constant__ double a20 = 0;                     //população inicial do estado 2
-__constant__ double a30 = 0.5;                   //população inicial do estado 3
-__constant__ double a40 = 0;                     //população inicial do estado 4
 
 #define CUDA_ERROR_CHECK
 #define CudaCheckError() __cudaCheckError(__FILE__, __LINE__)
@@ -95,7 +62,7 @@ __device__ double f(double a11, double a22, double a33, double a44, double a12, 
 	double a23, double b23, double a24, double b24, double a34, double b34, double delta21, double delta41, double delta43, int j)  //sistema de 4 níveis
 {
 	/*a11*/ if (j == 1)  return 2 * A * b12 + 0.5 * gama22 * a22 + 0.5 * gama44 * a44;				   //a11
-	/*a22*/ if (j == 2)  return 2 * A * b12 + 2 * B * b23 - gama22 * a22;				//a22
+	/*a22*/ if (j == 2)  return -2 * A * b12 + 2 * B * b23 - gama22 * a22;				//a22
 	/*a33*/ if (j == 3)  return 2 * A * b34 - 2 * B * b23 + 0.5 * gama22 * a22 + 0.5 * gama44 * a44;   //a33
 	/*a44*/ if (j == 4)  return -2 * A * b34 - gama44 * a44;		   //a44
 
@@ -125,20 +92,15 @@ __global__ void Kernel(double* a11, double* a22, double* a33, double* a44, doubl
 
 	int i = blockDim.x * blockIdx.x + threadIdx.x;
 
-	//deltaa = deltad + deltaf - deltai;
-
 	delta21 = 2 * Pi * (i - 0.5 * nucleos) * passoFreq * 1e6;
 	delta43 = delta21;
 	delta41 = 2 * delta21;
-
-	a11[i] = 0.5;
-	a33[i] = 0.5;
 
 	for (k = 1; k <= kMax - 1; k++)    //abre loop de k (temporal)
 	{
 		for (j = 1; j <= 16; j++)
 			k1[j] = f(a11[i], a22[i], a33[i], a44[i], a12[i], b12[i], a13[i], b13[i], a14[i], b14[i], a23[i], b23[i],
-				a13[i], b13[i], a24[i], b24[i], delta21, delta41, delta43, j);
+				a24[i], b24[i], a34[i], b34[i], delta21, delta41, delta43, j);
 
 		for (j = 1; j <= 16; j++)
 			k2[j] = f(a11[i] + k1[1] * h / 2, a22[i] + k1[2] * h / 2, a33[i] + k1[3] * h / 2, a44[i] + k1[4] * h / 2, a12[i] + k1[5] * h / 2, b12[i] + k1[6] * h / 2, a13[i] + k1[7] * h / 2, b13[i] + k1[8] * h / 2,
@@ -157,11 +119,11 @@ __global__ void Kernel(double* a11, double* a22, double* a33, double* a44, doubl
 		a11[i] = a11[i] + h * (k1[1] / 6 + k2[1] / 3 + k3[1] / 3 + k4[1] / 6);	   a22[i] = a22[i] + h * (k1[2] / 6 + k2[2] / 3 + k3[2] / 3 + k4[2] / 6);
 		a33[i] = a33[i] + h * (k1[3] / 6 + k2[3] / 3 + k3[3] / 3 + k4[3] / 6);	   a44[i] = a44[i] + h * (k1[4] / 6 + k2[4] / 3 + k3[4] / 3 + k4[4] / 6);
 		a12[i] = a12[i] + h * (k1[5] / 6 + k2[5] / 3 + k3[5] / 3 + k4[5] / 6);     b12[i] = b12[i] + h * (k1[6] / 6 + k2[6] / 3 + k3[6] / 3 + k4[6] / 6);
-		a13[i] = a13[i] + h * (k1[13] / 6 + k2[13] / 3 + k3[13] / 3 + k4[13] / 6); b13[i] = b13[i] + h * (k1[14] / 6 + k2[14] / 3 + k3[14] / 3 + k4[14] / 6);
+		a13[i] = a13[i] + h * (k1[7] / 6 + k2[7] / 3 + k3[7] / 3 + k4[7] / 6);	   b13[i] = b13[i] + h * (k1[8] / 6 + k2[8] / 3 + k3[8] / 3 + k4[8] / 6);
 		a14[i] = a14[i] + h * (k1[9] / 6 + k2[9] / 3 + k3[9] / 3 + k4[9] / 6);     b14[i] = b14[i] + h * (k1[10] / 6 + k2[10] / 3 + k3[10] / 3 + k4[10] / 6);
-		a23[i] = a23[i] + h * (k1[7] / 6 + k2[7] / 3 + k3[7] / 3 + k4[7] / 6);     b23[i] = b23[i] + h * (k1[8] / 6 + k2[8] / 3 + k3[8] / 3 + k4[8] / 6);
-		a24[i] = a24[i] + h * (k1[15] / 6 + k2[15] / 3 + k3[15] / 3 + k4[15] / 6); b24[i] = b24[i] + h * (k1[16] / 6 + k2[16] / 3 + k3[16] / 3 + k4[16] / 6);
-		a34[i] = a34[i] + h * (k1[11] / 6 + k2[11] / 3 + k3[11] / 3 + k4[11] / 6); b34[i] = b34[i] + h * (k1[12] / 6 + k2[12] / 3 + k3[12] / 3 + k4[12] / 6);
+		a23[i] = a23[i] + h * (k1[11] / 6 + k2[11] / 3 + k3[11] / 3 + k4[11] / 6); b23[i] = b23[i] + h * (k1[12] / 6 + k2[12] / 3 + k3[12] / 3 + k4[12] / 6);
+		a24[i] = a24[i] + h * (k1[13] / 6 + k2[13] / 3 + k3[13] / 3 + k4[13] / 6); b24[i] = b24[i] + h * (k1[14] / 6 + k2[14] / 3 + k3[14] / 3 + k4[14] / 6);
+		a34[i] = a34[i] + h * (k1[15] / 6 + k2[15] / 3 + k3[15] / 3 + k4[15] / 6); b34[i] = b34[i] + h * (k1[16] / 6 + k2[16] / 3 + k3[16] / 3 + k4[16] / 6);
 	}  //loop tempo
 }
 
@@ -182,7 +144,7 @@ int main()
 	printf("Calculando...\n");
 
 	double a[17][nucleos], soma;
-	int p, q;
+	int q;
 
 	double* dev_a11[gpu], * dev_a22[gpu];
 	double* dev_a33[gpu], * dev_a44[gpu];
@@ -200,7 +162,6 @@ int main()
 	{
 
 		char text[] = "dadosX.dat";
-		int digit;
 		text[5] = kp + '0';
 
 		arquivo[kp] = fopen(text, "w");
@@ -305,5 +266,4 @@ int main()
 	if (time_spent > 3600) printf("\nTempo de execucao = %f h\n\n", time_spent / 3600);
 
 	printf("\a");
-	//system("pause");
 }
