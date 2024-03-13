@@ -6,7 +6,7 @@
 #include <iostream>
 #include <time.h>
 
-//#include "propDevice.h"  //Biblioteca externa
+#include "propDevice.h"  //Biblioteca externa
 
 #define Pi 3.141592653589793
 
@@ -174,14 +174,14 @@ int main()
 	const int nucleos = blocks * threads;
 	FILE* arquivo[arq];
 
-	//propriedades();	//Biblioteca externa
+	propriedades();	//Biblioteca externa
 
 	printf("Blocks = %d\n", blocks);
 	printf("Threads = %d\n\n", threads);
 
 	printf("Calculando...\n");
 
-	double a[17][nucleos];
+	double a[17][nucleos], soma;
 	int p, q;
 
 	double* dev_a11[gpu], * dev_a22[gpu];
@@ -205,9 +205,9 @@ int main()
 
 		arquivo[kp] = fopen(text, "w");
 
-		fprintf(arquivo[kp], "\\g(d)\\-(21) \\g(r)\\-(11) \\g(r)\\-(22) \\g(r)\\-(33) \\g(r)\\-(44) Re\\g(s)\\-(12) Im\\g(s)\\-(12) Re\\g(s)\\-(23) Im\\g(s)\\-(23) Re\\g(s)\\-(14) Im\\g(s)\\-(14) Re\\g(s)\\-(43) Im\\g(s)\\-(43) Re\\g(s)\\-(13) Im\\g(s)\\-(13) l\\g(s)\\-(13)l\\+(2)\\-(velho) l\\g(s)\\-(14)l\\+(2)\\-(velho) l\\g(s)\\-(13)l\\+(2)\\-(novo) l\\g(s)\\-(14)l\\+(2)\\-(novo)\n");
+		fprintf(arquivo[kp], "\\g(d)\\-(21) \\g(r)\\-(11) \\g(r)\\-(22) \\g(r)\\-(33) \\g(r)\\-(44) Re\\g(s)\\-(12) Im\\g(s)\\-(12) Re\\g(s)\\-(13) Im\\g(s)\\-(13) Re\\g(s)\\-(14) Im\\g(s)\\-(14) Re\\g(s)\\-(23) Im\\g(s)\\-(23) Re\\g(s)\\-(24) Im\\g(s)\\-(24) Re\\g(s)\\-(34) Im\\g(s)\\-(34)\n");
 		fprintf(arquivo[kp], "MHz \n");
-		fprintf(arquivo[kp], "delta21 rho11 rho22 rho33 rho44 Re_rho12 Im_rho12 Re_rho23 Im_rho23 Re_rho14 Im_rho14 Re_rho43 Im_rho43 Re_rho13 Im_rho13 rho13^2 rho14^2 rho13^2novo rho14^2novo\n");
+		fprintf(arquivo[kp], "delta21 rho11 rho22 rho33 rho44 Re_rho12 Im_rho12 Re_rho13 Im_rho13 Re_rho14 Im_rho14 Re_rho23 Im_rho23 Re_rho24 Im_rho24 Re_rho34 Im_rho34\n");
 
 
 		for (int pp = 0; pp <= gpu - 1; pp++)
@@ -266,11 +266,13 @@ int main()
 
 			for (q = 0; q <= nucleos - 1; q++)
 			{
-				printf("%f %.16f %.16f %.16f %.16f %.16f %.16f %.16f %.16f %.16f %.16f %.16f %.16f %.16f %.16f\n", double((gpu * q + pp) * passoFreq),
-					a[1][q], a[2][q], a[3][q], a[4][q], a[5][q], a[6][q], a[7][q], a[8][q], a[9][q], a[10][q], a[11][q], a[12][q], a[13][q], a[14][q]);
+				soma = a[1][q] + a[2][q] + a[3][q] + a[4][q];
 
-				fprintf(arquivo[kp], "%f %.16f %.16f %.16f %.16f %.16f %.16f %.16f %.16f %.16f %.16f %.16f %.16f %.16f %.16f\n", double((gpu * q + pp - 0.5 * nucleos) * passoFreq),
-					a[1][q], a[2][q], a[3][q], a[4][q], a[5][q], a[6][q], a[7][q], a[8][q], a[9][q], a[10][q], a[11][q], a[12][q], a[13][q], a[14][q]);
+				printf("%f %.16f %.16f %.16f %.16f %.16f\n", double((gpu * q + pp) * passoFreq),
+					a[1][q], a[2][q], a[3][q], a[4][q], soma);
+
+				fprintf(arquivo[kp], "%f %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n", double((gpu * q + pp - 0.5 * nucleos) * passoFreq),
+					a[1][q], a[2][q], a[3][q], a[4][q], a[5][q], a[6][q], a[7][q], a[8][q], a[9][q], a[10][q], a[11][q], a[12][q], a[13][q], a[14][q], a[15][q], a[16][q]);
 			}
 
 			//cudaDeviceSynchronize();			
