@@ -10,6 +10,8 @@
 
 #define Pi 3.141592653589793
 
+//teste
+
 #define blocks 20
 #define threads 32
 #define gpu 1
@@ -19,7 +21,8 @@
 #define pontos 40
 #define passoFreq 0.5
 
-__constant__ double A = (2 * Pi) * 6e6;
+__constant__ double A12 = (2 * Pi) * 6e6;
+__constant__ double A34 = (2 * Pi) * 6e6;
 __constant__ double B = (2 * Pi) * 1e6;    //em rad/s
 
 #define gama22 (2*Pi)*6.06e6
@@ -58,23 +61,23 @@ __device__ double f(double a11, double a22, double a33, double a44, double a12, 
 	double a23, double b23, double a24, double b24, double a34, double b34, 
 	double delta21, double delta32, double delta41, double delta43, double delta31, double delta42, int j)  //sistema de 4 níveis
 {
-	/*a11*/ if (j == 1)  return 2 * A * b12 + 0.5 * gama22 * a22 + 0.5 * gama44 * a44;				   //a11
-	/*a22*/ if (j == 2)  return -2 * A * b12 + 2 * B * b23 - gama22 * a22;				//a22
-	/*a33*/ if (j == 3)  return 2 * A * b34 - 2 * B * b23 + 0.5 * gama22 * a22 + 0.5 * gama44 * a44;   //a33
-	/*a44*/ if (j == 4)  return -2 * A * b34 - gama44 * a44;		   //a44
+	/*a11*/ if (j == 1)  return 2 * A12 * b12 + 0.5 * gama22 * a22 + 0.5 * gama44 * a44;				   //a11
+	/*a22*/ if (j == 2)  return -2 * A12 * b12 + 2 * B * b23 - gama22 * a22;				//a22
+	/*a33*/ if (j == 3)  return 2 * A34 * b34 - 2 * B * b23 + 0.5 * gama22 * a22 + 0.5 * gama44 * a44;   //a33
+	/*a44*/ if (j == 4)  return -2 * A34 * b34 - gama44 * a44;		   //a44
 
 	/*a12*/ if (j == 5)  return -gama12 * a12 - delta21 * b12 + B * b13; //a12
-	/*b12*/ if (j == 6)  return -gama12 * b12 + delta21 * a12 + (a22 - a11) * A - B * a13; //b12
-	/*a13*/ if (j == 7)  return -gama13 * a13 - delta31 * b13 + A * b14 - A * b23 + B * b12; //a13
-	/*b13*/ if (j == 8)  return -gama13 * b13 + delta31 * a13 - A * a14 + A * a23 - B * a12; //b13
-	/*a14*/ if (j == 9)  return -gama14 * a14 - delta41 * b14 + A * b13 - A * b24; //a14
-	/*b14*/ if (j == 10) return -gama14 * b14 + delta41 * a14 - A * a13 + A * a24; //b14
-	/*a23*/ if (j == 11) return -gama23 * a23 - delta32 * b23 - A * b13 + A * b24; //a43
-	/*b23*/ if (j == 12) return -gama23 * b23 + delta32 * a23 + A * a13 - A * a24 + (a33 - a22) * B; //b43
-	/*a24*/ if (j == 13) return -gama24 * a24 - delta42 * b24 - A * b14 + A * b23 - B * b34; //a13
-	/*b24*/ if (j == 14) return -gama24 * b24 + delta42 * a24 + A * a14 - A * a23 + B * a34; //b13
+	/*b12*/ if (j == 6)  return -gama12 * b12 + delta21 * a12 + (a22 - a11) * A12 - B * a13; //b12
+	/*a13*/ if (j == 7)  return -gama13 * a13 - delta31 * b13 + A34 * b14 - A12 * b23 + B * b12; //a13
+	/*b13*/ if (j == 8)  return -gama13 * b13 + delta31 * a13 - A34 * a14 + A12 * a23 - B * a12; //b13
+	/*a14*/ if (j == 9)  return -gama14 * a14 - delta41 * b14 + A34 * b13 - A12 * b24; //a14
+	/*b14*/ if (j == 10) return -gama14 * b14 + delta41 * a14 - A34 * a13 + A12 * a24; //b14
+	/*a23*/ if (j == 11) return -gama23 * a23 - delta32 * b23 - A12 * b13 + A34 * b24; //a43
+	/*b23*/ if (j == 12) return -gama23 * b23 + delta32 * a23 + A12 * a13 - A34 * a24 + (a33 - a22) * B; //b43
+	/*a24*/ if (j == 13) return -gama24 * a24 - delta42 * b24 - A12 * b14 + A34 * b23 - B * b34; //a13
+	/*b24*/ if (j == 14) return -gama24 * b24 + delta42 * a24 + A12 * a14 - A34 * a23 + B * a34; //b13
 	/*a34*/ if (j == 15) return -gama34 * a34 - delta43 * b34 - B * b24; //a24
-	/*b34*/ if (j == 16) return -gama34 * b34 + delta43 * a34 + B * a24 - (a33 - a44) * A; //b24
+	/*b34*/ if (j == 16) return -gama34 * b34 + delta43 * a34 + B * a24 - (a33 - a44) * A34; //b24
 }
 
 __global__ void Kernel(double* a11, double* a22, double* a33, double* a44, double* a12, double* b12, double* a13, double* b13, double* a14, double* b14,
