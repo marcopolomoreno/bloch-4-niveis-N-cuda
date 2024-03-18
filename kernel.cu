@@ -19,11 +19,11 @@
 
 #define kMax 100000
 #define pontos 40
-#define passoFreq 0.5
+#define passoFreq 0.2
 
-__constant__ double A12 = (2 * Pi) * 6e6;
-__constant__ double A34 = (2 * Pi) * 6e6;
-__constant__ double B = (2 * Pi) * 1e6;    //em rad/s
+__constant__ double A12 =	(2 * Pi) * 4e6;
+__constant__ double A34 =	(2 * Pi) * 4e6;
+__constant__ double B =		(2 * Pi) * 4e6;    //em rad/s
 
 #define gama22 (2*Pi)*6.06e6
 #define gama44 (2*Pi)*6.06e6
@@ -72,12 +72,12 @@ __device__ double f(double a11, double a22, double a33, double a44, double a12, 
 	/*b13*/ if (j == 8)  return -gama13 * b13 + delta31 * a13 - A34 * a14 + A12 * a23 - B * a12; //b13
 	/*a14*/ if (j == 9)  return -gama14 * a14 - delta41 * b14 + A34 * b13 - A12 * b24; //a14
 	/*b14*/ if (j == 10) return -gama14 * b14 + delta41 * a14 - A34 * a13 + A12 * a24; //b14
-	/*a23*/ if (j == 11) return -gama23 * a23 - delta32 * b23 - A12 * b13 + A34 * b24; //a43
-	/*b23*/ if (j == 12) return -gama23 * b23 + delta32 * a23 + A12 * a13 - A34 * a24 + (a33 - a22) * B; //b43
-	/*a24*/ if (j == 13) return -gama24 * a24 - delta42 * b24 - A12 * b14 + A34 * b23 - B * b34; //a13
-	/*b24*/ if (j == 14) return -gama24 * b24 + delta42 * a24 + A12 * a14 - A34 * a23 + B * a34; //b13
-	/*a34*/ if (j == 15) return -gama34 * a34 - delta43 * b34 - B * b24; //a24
-	/*b34*/ if (j == 16) return -gama34 * b34 + delta43 * a34 + B * a24 - (a33 - a44) * A34; //b24
+	/*a23*/ if (j == 11) return -gama23 * a23 - delta32 * b23 - A12 * b13 + A34 * b24; //a23
+	/*b23*/ if (j == 12) return -gama23 * b23 + delta32 * a23 + A12 * a13 - A34 * a24 + (a33 - a22) * B; //b23
+	/*a24*/ if (j == 13) return -gama24 * a24 - delta42 * b24 - A12 * b14 + A34 * b23 - B * b34; //a24
+	/*b24*/ if (j == 14) return -gama24 * b24 + delta42 * a24 + A12 * a14 - A34 * a23 + B * a34; //b24
+	/*a34*/ if (j == 15) return -gama34 * a34 - delta43 * b34 - B * b24; //a34
+	/*b34*/ if (j == 16) return -gama34 * b34 + delta43 * a34 + B * a24 - (a33 - a44) * A34; //b34
 }
 
 __global__ void Kernel(double* a11, double* a22, double* a33, double* a44, double* a12, double* b12, double* a13, double* b13, double* a14, double* b14,
@@ -95,11 +95,11 @@ __global__ void Kernel(double* a11, double* a22, double* a33, double* a44, doubl
 
 	delta21 = 2 * Pi * (i - 0.5 * nucleos) * passoFreq * 1e6;
 	delta32 = -delta21;
-	delta43 =  delta21;
-	delta41 =  delta21;
+	delta43 = delta21;
+	delta41 = delta21;
 
-	delta31 = 0;
-	delta42 = 0;
+	delta31 = delta21 - delta32;
+	delta42 = 2*delta21;
 
 	for (k = 1; k <= kMax - 1; k++)    //abre loop de k (temporal)
 	{
@@ -171,9 +171,9 @@ int main()
 
 		arquivo[kp] = fopen(text, "w");
 
-		fprintf(arquivo[kp], "\\g(d)\\-(21) \\g(r)\\-(11) \\g(r)\\-(22) \\g(r)\\-(33) \\g(r)\\-(44) Re\\g(s)\\-(12) Im\\g(s)\\-(12) Re\\g(s)\\-(13) Im\\g(s)\\-(13) Re\\g(s)\\-(14) Im\\g(s)\\-(14) Re\\g(s)\\-(23) Im\\g(s)\\-(23) Re\\g(s)\\-(24) Im\\g(s)\\-(24) Re\\g(s)\\-(34) Im\\g(s)\\-(34)\n");
+		fprintf(arquivo[kp], "\\g(d)\\-(21) \\g(r)\\-(11) \\g(r)\\-(22) \\g(r)\\-(33) \\g(r)\\-(44) Re\\g(s)\\-(12) Im\\g(s)\\-(12) Re\\g(s)\\-(13) Im\\g(s)\\-(13) Re\\g(s)\\-(14) Im\\g(s)\\-(14) Re\\g(s)\\-(23) Im\\g(s)\\-(23) Re\\g(s)\\-(24) Im\\g(s)\\-(24) Re\\g(s)\\-(34) Im\\g(s)\\-(34) I14\n");
 		fprintf(arquivo[kp], "MHz \n");
-		fprintf(arquivo[kp], "delta21 rho11 rho22 rho33 rho44 Re_rho12 Im_rho12 Re_rho13 Im_rho13 Re_rho14 Im_rho14 Re_rho23 Im_rho23 Re_rho24 Im_rho24 Re_rho34 Im_rho34\n");
+		fprintf(arquivo[kp], "delta21 rho11 rho22 rho33 rho44 Re_rho12 Im_rho12 Re_rho13 Im_rho13 Re_rho14 Im_rho14 Re_rho23 Im_rho23 Re_rho24 Im_rho24 Re_rho34 Im_rho34, I14\n");
 
 
 		for (int pp = 0; pp <= gpu - 1; pp++)
@@ -237,8 +237,8 @@ int main()
 				printf("%f %.16f %.16f %.16f %.16f %.16f\n", double((gpu * q + pp) * passoFreq),
 					a[1][q], a[2][q], a[3][q], a[4][q], soma);
 
-				fprintf(arquivo[kp], "%f %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n", double((gpu * q + pp - 0.5 * nucleos) * passoFreq),
-					a[1][q], a[2][q], a[3][q], a[4][q], a[5][q], a[6][q], a[7][q], a[8][q], a[9][q], a[10][q], a[11][q], a[12][q], a[13][q], a[14][q], a[15][q], a[16][q]);
+				fprintf(arquivo[kp], "%f %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n", double((gpu * q + pp - 0.5 * nucleos) * passoFreq),
+					a[1][q], a[2][q], a[3][q], a[4][q], a[5][q], a[6][q], a[7][q], a[8][q], a[9][q], a[10][q], a[11][q], a[12][q], a[13][q], a[14][q], a[15][q], a[16][q], a[9][q]* a[9][q] + a[10][q]* a[10][q]);
 			}
 
 			//cudaDeviceSynchronize();			
