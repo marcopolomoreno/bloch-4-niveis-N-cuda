@@ -93,13 +93,17 @@ __global__ void Kernel(double* a11, double* a22, double* a33, double* a44, doubl
 
 	int i = blockDim.x * blockIdx.x + threadIdx.x;
 
+	//1 fóton
 	delta21 = 2 * Pi * (i - 0.5 * nucleos) * passoFreq * 1e6;
-	delta32 = -delta21;
-	delta43 = delta21;
-	delta41 = delta21;
+	delta32 = -delta21;		//delta32 negativo
+	delta43 =  delta21;
 
-	delta31 = delta21 - delta32;
-	delta42 = 2*delta21;
+	//2 fótons
+	delta31 = delta21 + delta32;	//delta32 negativo
+	delta42 = delta43 + delta32;	//delta32 negativo
+
+	//3 fótons
+	delta41 = delta21 + delta43 + delta32;
 
 	for (k = 1; k <= kMax - 1; k++)    //abre loop de k (temporal)
 	{
