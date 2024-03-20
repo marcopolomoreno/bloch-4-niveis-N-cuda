@@ -1,0 +1,9 @@
+20/03/2024
+Testes com deltas dos três campos iguais:
+
+1 - Para campos até 5gamma22, um passo de h = 5 ps parece ser suficiente.
+
+2 - Variando o tempo de interação: o tamanho do dip só diminui quando t < 250 ns. Quando t vai diminuindo, as curvas começam a ficar feias.
+    t muito grande (> 1000 ns) não parece alterar o tamanho do dip.
+
+3 - Aumentando Omega: O campo gerado (Omega14) tem um pequeno dip já em 0.5gamma. E um dip grande em rho23 aparece já em 0.2gamma.

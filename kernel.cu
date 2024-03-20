@@ -17,18 +17,18 @@
 #define gpu 1
 #define arq 1		//número de arquivo para salvar
 
-#define kMax 100000
+#define kMax 200000
 #define pontos 40
 #define passoFreq 0.2
-
-__constant__ double A12 =	(2 * Pi) * 4e6;
-__constant__ double A34 =	(2 * Pi) * 4e6;
-__constant__ double B =		(2 * Pi) * 4e6;    //em rad/s
 
 #define gama22 (2*Pi)*6.06e6
 #define gama44 (2*Pi)*6.06e6
 
-__constant__ double h = 5e-12;    //*10000/kMax;
+__constant__ double A12 = 2*gama22;
+__constant__ double A34 = 2*gama44;
+__constant__ double B = 2*gama22;
+
+__constant__ double h = 5e-12;    //kMax = 200000	=>	 t = 1000 ns
 
 __constant__ double gama12 = 0.5 * gama22;
 __constant__ double gama13 = 0;
